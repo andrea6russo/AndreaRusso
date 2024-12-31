@@ -1,0 +1,172 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buon Anno da Andrea Russo</title>
+  <style>
+    body {
+      background-color: #87CEEB; /* Azzurro */
+      color: #000;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .hidden {
+      display: none;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .leaderboard {
+      margin-top: 20px;
+    }
+    .leaderboard ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .leaderboard li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Buon Anno a te e Famiglia ❤️</h1>
+  <p>Da Andrea Russo</p>
+  <br><br>
+  
+  <p>Rispondi a 10 domande di cultura generale difficili!</p>
+  <div id="game">
+    <p id="question">Caricamento domanda...</p>
+    <button onclick="checkAnswer(true)">Sì</button>
+    <button onclick="checkAnswer(false)">No</button>
+  </div>
+  <p id="message" class="hidden"></p>
+  <div id="end-game" class="hidden">
+    <p id="final-score"></p>
+    <button onclick="askName()">Inserisci il tuo nome nella Classifica</button>
+    <input type="text" id="name-input" class="hidden" placeholder="Il tuo nome">
+    <button id="save-button" class="hidden" onclick="saveScore()">Salva</button>
+    <button id="share-button" class="hidden" onclick="shareGame()">Condividi il gioco e sfida un amico a fare meglio di te!!</button>
+  </div>
+  
+  <div class="leaderboard hidden" id="leaderboard-section">
+    <h2>Classifica</h2>
+    <ul id="leaderboard-list"></ul>
+  </div>
+
+  <script>
+    const questions = [
+      { text: "La teoria della relatività è stata formulata da Albert Einstein?", answer: true },
+      { text: "La battaglia di Waterloo avvenne nel 1815?", answer: true },
+      { text: "Il pi greco vale circa 3.14?", answer: true },
+      { text: "La Grande Muraglia Cinese è visibile dallo spazio?", answer: false },
+      { text: "I diamanti sono formati principalmente da carbonio?", answer: true },
+      { text: "L'equatore divide la Terra in due emisferi uguali?", answer: true },
+      { text: "La capitale del Canada è Toronto?", answer: false },
+      { text: "La fotosintesi clorofilliana avviene nelle radici delle piante?", answer: false },
+      { text: "L'acqua bolle a 100°C a livello del mare?", answer: true },
+      { text: "Il simbolo chimico dell'oro è Au?", answer: true },
+    ];
+
+    let selectedQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function startGame() {
+      selectedQuestions = shuffleArray(questions).slice(0, 10);
+      currentQuestionIndex = 0;
+      score = 0;
+      document.getElementById("question").innerText = selectedQuestions[currentQuestionIndex].text;
+    }
+
+    function checkAnswer(userAnswer) {
+      const currentQuestion = selectedQuestions[currentQuestionIndex];
+
+      if (userAnswer === currentQuestion.answer) {
+        score++;
+      }
+
+      currentQuestionIndex++;
+      if (currentQuestionIndex < selectedQuestions.length) {
+        document.getElementById("question").innerText = selectedQuestions[currentQuestionIndex].text;
+      } else {
+        endGame();
+      }
+    }
+
+    function endGame() {
+      document.getElementById("game").classList.add("hidden");
+      document.getElementById("end-game").classList.remove("hidden");
+      document.getElementById("final-score").innerText = `Hai totalizzato ${score} punti su 10!`;
+      showLeaderboard();
+    }
+
+    function askName() {
+      document.getElementById("name-input").classList.remove("hidden");
+      document.getElementById("save-button").classList.remove("hidden");
+    }
+
+    function saveScore() {
+      const name = document.getElementById("name-input").value;
+      if (name) {
+        localStorage.setItem(name, score);
+        document.getElementById("save-button").classList.add("hidden");
+        document.getElementById("name-input").classList.add("hidden");
+        document.getElementById("share-button").classList.remove("hidden");
+      }
+    }
+
+    function showLeaderboard() {
+      const leaderboard = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        leaderboard.push({ name: key, score: value });
+      }
+      leaderboard.sort((a, b) => b.score - a.score);
+
+      let leaderboardHTML = "";
+      leaderboard.forEach((entry) => {
+        leaderboardHTML += `<li>${entry.name}: ${entry.score} punti</li>`;
+      });
+
+      const leaderboardList = document.getElementById("leaderboard-list");
+      leaderboardList.innerHTML = leaderboardHTML;
+
+      document.getElementById("leaderboard-section").classList.remove("hidden");
+    }
+
+    function shareGame() {
+      const shareData = {
+        title: "Gioco di Fine Anno",
+        text: "Prova a battere il mio punteggio in questo *Gioco a Quiz* creato da Andrea Russo!",
+        url: window.location.href,
+      };
+
+      if (navigator.share) {
+        navigator.share(shareData).catch(console.error);
+      } else {
+        alert("La condivisione non è supportata su questo dispositivo.");
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
